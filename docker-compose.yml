@@ -51,8 +51,6 @@ services:
       SPRING_DATASOURCE_URL: jdbc:mysql://upmonthdb:3306/upmonthdb?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&connectTimeout=30000
       SPRING_DATASOURCE_USERNAME: upmonth
       SPRING_DATASOURCE_PASSWORD: upmonth
-      SPRING_DATASOURCE_HIKARI_CONNECTION_TIMEOUT: 30000
-      SPRING_DATASOURCE_HIKARI_INITIALIZATION_FAIL_TIMEOUT: 30000
     depends_on:
       db-init:
         condition: service_completed_successfully
