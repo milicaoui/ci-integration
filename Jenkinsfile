@@ -16,7 +16,9 @@ pipeline {
         stage('Clone Projects') {
             steps {
                 sh '''
+                    echo "Cloning Spring Boot repo..."
                     git clone $SPRING_REPO
+                    echo "Cloning Pytest repo..."
                     git clone $TEST_REPO
                 '''
             }
@@ -27,11 +29,11 @@ pipeline {
                 sh '''
                     echo "--- Spring Boot App ---"
                     ls -la springbootapp/
-                    [ -f "springbootapp/pom.xml" ] || exit 1
+                    [ -f "springbootapp/pom.xml" ] || (echo "Missing pom.xml" && exit 1)
 
                     echo "--- Pytest Project ---"
                     ls -la pytestproject/
-                    [ -f "pytestproject/requirements.txt" ] || exit 1
+                    [ -f "pytestproject/requirements.txt" ] || (echo "Missing requirements.txt" && exit 1)
                 '''
             }
         }
@@ -46,47 +48,37 @@ pipeline {
 
         stage('Run Integration Tests') {
             steps {
-                dir('ci-integration') {
-                    sh '''
-                        docker compose down --remove-orphans || true
-                        docker rm -f springbootapp || true
-                        docker rm -f pytest-tests || true
-                        docker compose build --no-cache
-                        docker compose up --abort-on-container-exit --exit-code-from pytest-tests
-                    '''
-                }
-            }
-        }
+                sh '''
+                    echo "Running integration tests with Docker Compose..."
+                    pwd
+                    ls -la
+                    cat docker-compose.yml
 
-        stage('Build Final Docker Image (Optional)') {
-            when {
-                expression { false } // set to true if you want to build a release image
-            }
-            steps {
-                dir('ci-integration') {
-                    sh 'docker compose build'
-                }
+                    docker compose down --remove-orphans || true
+                    docker rm -f springbootapp || true
+                    docker rm -f pytest-tests || true
+
+                    docker compose build --no-cache
+                    docker compose up --abort-on-container-exit --exit-code-from pytest-tests
+                '''
             }
         }
     }
 
     post {
         always {
-            dir('ci-integration') {
-                sh '''
-                    docker compose down --remove-orphans || true
-                    docker rm -f springbootapp || true
-                    docker rm -f pytest-tests || true
-                '''
-            }
+            sh '''
+                echo "Cleaning up Docker containers..."
+                docker compose down --remove-orphans || true
+                docker rm -f springbootapp || true
+                docker rm -f pytest-tests || true
+            '''
         }
-
         success {
             echo "🎉 All tests passed successfully!"
         }
-
         failure {
-            echo "❌ Tests failed. Cleanup done."
+            echo "❌ Tests failed. See logs above."
         }
     }
 }
