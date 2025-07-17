@@ -2,10 +2,10 @@ pipeline {
     agent any
 
     environment {
-        MYSQL_ROOT_PASSWORD = 'upmonth'
         CI_REPO = 'https://github.com/milicaoui/ci-integration.git'
         SPRING_REPO = 'https://github.com/milicaoui/springbootapp.git'
         TEST_REPO = 'https://github.com/milicaoui/pytestproject.git'
+        MYSQL_ROOT_PASSWORD = 'upmonth'  // Add any other env vars here if needed
     }
 
     stages {
@@ -15,9 +15,22 @@ pipeline {
             }
         }
 
+        stage('Cleanup') {
+            steps {
+                dir('ci-integration') {
+                    sh '''
+                        echo "Cleaning up old docker containers and networks..."
+                        docker compose down --remove-orphans || true
+                        docker rm -f springbootapp || true
+                        docker rm -f pytest-tests || true
+                        docker rm -f testupmonthdb || true
+                    '''
+                }
+            }
+        }
+
         stage('Clone Projects') {
             steps {
-                // Clone ci-integration first to get docker-compose.yml
                 sh '''
                     echo "Cloning CI Integration repo..."
                     git clone $CI_REPO ci-integration
@@ -60,13 +73,6 @@ pipeline {
                 dir('ci-integration') {
                     sh '''
                         echo "Running integration tests with docker-compose..."
-                        pwd
-                        ls -la
-
-                        docker compose down --remove-orphans || true
-                        docker rm -f springbootapp || true
-                        docker rm -f pytest-tests || true
-
                         docker compose build --no-cache
                         docker compose up --abort-on-container-exit --exit-code-from pytest-tests
                     '''
@@ -79,10 +85,11 @@ pipeline {
         always {
             dir('ci-integration') {
                 sh '''
-                    echo "Cleaning up docker containers..."
+                    echo "Cleaning up docker containers after tests..."
                     docker compose down --remove-orphans || true
                     docker rm -f springbootapp || true
                     docker rm -f pytest-tests || true
+                    docker rm -f testupmonthdb || true
                 '''
             }
         }
