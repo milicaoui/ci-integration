@@ -2,6 +2,7 @@ pipeline {
     agent any
 
     environment {
+        MYSQL_ROOT_PASSWORD = 'upmonth'
         CI_REPO = 'https://github.com/milicaoui/ci-integration.git'
         SPRING_REPO = 'https://github.com/milicaoui/springbootapp.git'
         TEST_REPO = 'https://github.com/milicaoui/pytestproject.git'
