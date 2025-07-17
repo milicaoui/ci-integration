@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  spring-app:
+    build:
+      context: ./upmtest
+    ports:
+      - "8081:8081"
+    container_name: upmtest
+    healthcheck:
+      test: ["CMD-SHELL", "exit 0"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  pytest-tests:
+    build:
+      context: ./python-test-project
+    depends_on:
+      spring-app:
+        condition: service_healthy
+    container_name: pytest-tests
