@@ -43,6 +43,7 @@ services:
         FLUSH PRIVILEGES;
         "
 
+
   spring-app:
     build:
       context: ../springbootapp
