@@ -46,6 +46,15 @@ services:
     ports:
       - "8081:8081"
     container_name: springbootapp
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://upmonthdb:3306/upmonthdb?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: upmonth
+      SPRING_DATASOURCE_PASSWORD: upmonth
+    depends_on:
+      upmonth-database:
+        condition: service_healthy
+    networks:
+      - upmonth-dev-tests
     healthcheck:
       test: ["CMD-SHELL", "exit 0"]
 
