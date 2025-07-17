@@ -52,16 +52,14 @@ services:
       SPRING_DATASOURCE_USERNAME: upmonth
       SPRING_DATASOURCE_PASSWORD: upmonth
     depends_on:
-      db-init:
-        condition: service_completed_successfully
+      - db-init
     networks:
       - upmonth-dev-tests
     healthcheck:
-      test: ["CMD", "exit 0"]
+      test: ["CMD-SHELL", "exit 0"]
       interval: 10s
       timeout: 5s
       retries: 10
-    restart: on-failure
 
   pytest-tests:
     build:
