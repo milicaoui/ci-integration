@@ -49,7 +49,6 @@ services:
       mysql -h upmonthdb -uroot -p$$MYSQL_ROOT_PASSWORD <<-EOSQL
         CREATE DATABASE IF NOT EXISTS upmonthdb CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
         CREATE DATABASE IF NOT EXISTS upmsearch CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-        CREATE DATABASE IF NOT EXISTS \`text-extraction\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
         GRANT ALL PRIVILEGES ON *.* TO 'upmonth'@'%';
         FLUSH PRIVILEGES;
         SHOW DATABASES;
