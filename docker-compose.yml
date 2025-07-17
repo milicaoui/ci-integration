@@ -3,19 +3,16 @@ version: '3.8'
 services:
   spring-app:
     build:
-      context: ./upmtest
+      context: ../springbootapp
     ports:
       - "8081:8081"
-    container_name: upmtest
+    container_name: springbootapp
     healthcheck:
-      test: ["CMD-SHELL", "exit 0"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      test: ["CMD-SHELL", exit 0"]
 
   pytest-tests:
     build:
-      context: ./python-test-project
+      context: ../pytestproject
     depends_on:
       spring-app:
         condition: service_healthy
