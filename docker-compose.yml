@@ -1,5 +1,6 @@
-services:
+version: '3.8'
 
+services:
   upmonth-database:
     image: mysql:5.7
     container_name: testupmonthdb
@@ -12,15 +13,17 @@ services:
       - MYSQL_DATABASE=testupmonthdb
     volumes:
       - upmonth-database-data:/var/lib/mysql
+      - ./mysql-custom.cnf:/etc/mysql/conf.d/custom.cnf
     networks:
       upmonth-dev-tests:
         aliases:
           - upmonthdb
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 10s
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-pupmonth"]
+      interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 30
+    command: --default-authentication-plugin=mysql_native_password
 
   db-init:
     image: mysql:5.7
@@ -31,18 +34,24 @@ services:
       - upmonth-dev-tests
     environment:
       MYSQL_ROOT_PASSWORD: upmonth
-    entrypoint:
-      - sh
-      - -c
-      - |
-        mysql -h upmonthdb -uroot -p"$MYSQL_ROOT_PASSWORD" -e "
-        CREATE DATABASE IF NOT EXISTS upmonthdb CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; 
-        CREATE DATABASE IF NOT EXISTS upmsearch CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; 
-        CREATE DATABASE IF NOT EXISTS \`text-extraction\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; 
-        GRANT ALL PRIVILEGES ON *.* TO 'upmonth'@'%'; 
+      MYSQL_HOST: upmonthdb
+    entrypoint: |
+      sh -c "
+      echo 'Waiting for database to be ready...'
+      while ! mysqladmin ping -h upmonthdb -uroot -p$$MYSQL_ROOT_PASSWORD --silent; do
+        sleep 2
+      done
+      
+      echo 'Initializing databases...'
+      mysql -h upmonthdb -uroot -p$$MYSQL_ROOT_PASSWORD -e \"
+        CREATE DATABASE IF NOT EXISTS upmonthdb CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+        CREATE DATABASE IF NOT EXISTS upmsearch CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+        CREATE DATABASE IF NOT EXISTS \`text-extraction\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+        GRANT ALL PRIVILEGES ON *.* TO 'upmonth'@'%';
         FLUSH PRIVILEGES;
-        "
-
+      \"
+      echo 'Database initialization complete'
+      "
 
   spring-app:
     build:
@@ -51,16 +60,22 @@ services:
       - "8081:8081"
     container_name: springbootapp
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://upmonthdb:3306/upmonthdb?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=UTC
+      SPRING_DATASOURCE_URL: jdbc:mysql://upmonthdb:3306/upmonthdb?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&connectTimeout=30000
       SPRING_DATASOURCE_USERNAME: upmonth
       SPRING_DATASOURCE_PASSWORD: upmonth
+      SPRING_DATASOURCE_HIKARI_CONNECTION_TIMEOUT: 30000
+      SPRING_DATASOURCE_HIKARI_INITIALIZATION_FAIL_TIMEOUT: 30000
     depends_on:
-      upmonth-database:
+      db-init:
         condition: service_healthy
     networks:
       - upmonth-dev-tests
     healthcheck:
-      test: ["CMD-SHELL", "exit 0"]
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: on-failure
 
   pytest-tests:
     build:
@@ -69,6 +84,8 @@ services:
       spring-app:
         condition: service_healthy
     container_name: pytest-tests
+    networks:
+      - upmonth-dev-tests
 
 networks:
   upmonth-dev-tests:
