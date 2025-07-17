@@ -35,20 +35,25 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: upmonth
       MYSQL_HOST: upmonthdb
-    entrypoint: |
-      sh -c "
+    labels:
+      - "com.docker.compose.oneoff=true"
+    command: >
+      bash -c "
       echo 'Waiting for database to be ready...'
       while ! mysqladmin ping -h upmonthdb -uroot -p$$MYSQL_ROOT_PASSWORD --silent; do
         sleep 2
+        echo 'Still waiting for database...'
       done
       
       echo 'Initializing databases...'
-      mysql -h upmonthdb -uroot -p$$MYSQL_ROOT_PASSWORD -e \"
+      mysql -h upmonthdb -uroot -p$$MYSQL_ROOT_PASSWORD <<-EOSQL
         CREATE DATABASE IF NOT EXISTS upmonthdb CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
         CREATE DATABASE IF NOT EXISTS upmsearch CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+        CREATE DATABASE IF NOT EXISTS \`text-extraction\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
         GRANT ALL PRIVILEGES ON *.* TO 'upmonth'@'%';
         FLUSH PRIVILEGES;
-      \"
+        SHOW DATABASES;
+      EOSQL
       echo 'Database initialization complete'
       "
 
@@ -66,7 +71,7 @@ services:
       SPRING_DATASOURCE_HIKARI_INITIALIZATION_FAIL_TIMEOUT: 30000
     depends_on:
       db-init:
-        condition: service_healthy
+        condition: service_completed_successfully
     networks:
       - upmonth-dev-tests
     healthcheck:

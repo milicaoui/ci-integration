@@ -74,7 +74,7 @@ pipeline {
                     sh '''
                         echo "Running integration tests with docker-compose..."
                         docker compose build --no-cache
-                        docker compose up --abort-on-container-exit --exit-code-from pytest-tests
+                        docker compose up --abort-on-container-exit --exit-code-from pytest-tests spring-app pytest-tests
                     '''
                 }
             }
