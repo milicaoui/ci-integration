@@ -8,7 +8,7 @@ services:
       - "8081:8081"
     container_name: springbootapp
     healthcheck:
-      test: ["CMD-SHELL", exit 0"]
+      test: ["CMD-SHELL", "exit 0"]
 
   pytest-tests:
     build:
