@@ -1,12 +1,58 @@
 version: '3.8'
 
 services:
+
+  upmonth-database:
+    image: mysql:5.7
+    container_name: testupmonthdb
+    ports:
+      - "3308:3306"
+    environment: 
+      - MYSQL_ROOT_PASSWORD=upmonth
+      - MYSQL_USER=upmonth
+      - MYSQL_PASSWORD=upmonth
+      - MYSQL_DATABASE=testupmonthdb
+    volumes:
+      - upmonth-database-data:/var/lib/mysql
+    networks:
+      upmonth-dev-tests:
+        aliases:
+          - upmonthdb
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  db-init:
+    image: mysql:5.7
+    depends_on:
+      upmonth-database:
+        condition: service_healthy
+    networks:
+      - upmonth-dev-tests
+    entrypoint: [
+      "sh", "-c",
+      "mysql -h upmonthdb -uroot -p${MYSQL_ROOT_PASSWORD} -e \"\
+      CREATE DATABASE IF NOT EXISTS upmonthdb CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; \
+      CREATE DATABASE IF NOT EXISTS upmsearch CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; \
+      CREATE DATABASE IF NOT EXISTS `text-extraction` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; \
+      GRANT ALL PRIVILEGES ON *.* TO 'upmonth'@'%' IDENTIFIED BY 'upmonth' WITH GRANT OPTION; \
+      FLUSH PRIVILEGES;\""
+    ]
+    environment:
+      MYSQL_ROOT_PASSWORD: upmonth
+
   spring-app:
     build:
       context: ../springbootapp
     ports:
       - "8081:8081"
     container_name: springbootapp
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://upmonthdb:3306/testupmonthdb?useUnicode=true&characterEncoding=utf8mb4&useSSL=false&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: upmonth
+      SPRING_DATASOURCE_PASSWORD: upmonth
     healthcheck:
       test: ["CMD-SHELL", "exit 0"]
 
