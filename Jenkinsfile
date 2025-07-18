@@ -31,16 +31,21 @@ pipeline {
 
         stage('Clone Projects') {
             steps {
-                sh '''
+                script {
                     echo "Cloning CI Integration repo..."
-                    git clone $CI_REPO ci-integration
-                    echo "Cloning Spring Boot repo..."
-                    git clone $SPRING_REPO springbootapp
+                    sh "git clone $CI_REPO ci-integration"
+
+                    echo "Cloning Spring Boot repo (PRIVATE)..."
+                    dir('springbootapp') {
+                        git credentialsId: 'fde95b67-c24d-4ad3-bd22-297701e72f6a', url: 'https://github.com/milicaoui/springbootapp.git'
+                    }
+
                     echo "Cloning Pytest repo..."
-                    git clone $TEST_REPO pytestproject
-                '''
+                    sh "git clone $TEST_REPO pytestproject"
+                }
             }
         }
+
 
         stage('Verify Structure') {
             steps {
