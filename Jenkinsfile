@@ -6,7 +6,7 @@ pipeline {
         SPRING_REPO = 'https://github.com/milicaoui/springbootapp.git'
         TEST_REPO = 'https://github.com/milicaoui/pytestproject.git'
         ANALYTICS_REPO = 'git@bitbucket.org:upmonthteam/upmonth-analytics.git'
-        ANALYTICS_VERSION = "1.0.0"  // or read dynamically from pom.xml if needed
+        ANALYTICS_VERSION = "666.0.0"  // or read dynamically from pom.xml if needed
         MYSQL_ROOT_PASSWORD = 'upmonth'  // Add any other env vars here if needed
     }
 
@@ -59,12 +59,14 @@ pipeline {
         stage('Build Analytics Service') {
             steps {
                 configFileProvider([configFile(fileId: 'upmonth-maven-settings', variable: 'MAVEN_SETTINGS')]) {
-                dir('upmonth-analytics') {
-                    sh "mvn clean package -s $MAVEN_SETTINGS -DskipTests"
-                }
+                    dir('upmonth-analytics') {
+                        sh 'cat $MAVEN_SETTINGS' // Optional debug
+                        sh "mvn clean package -s $MAVEN_SETTINGS -DskipTests"
+                    }
                 }
             }
         }
+
 
 
         stage('Verify Structure') {
