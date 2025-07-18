@@ -17,14 +17,7 @@ pipeline {
             }
         }
 
-        stage('Add Bitbucket to known_hosts') {
-            steps {
-                sh '''
-                    mkdir -p ~/.ssh
-                    ssh-keyscan bitbucket.org >> ~/.ssh/known_hosts
-                '''
-            }
-        }
+
 
         stage('Clone Projects') {
             steps {
@@ -32,7 +25,7 @@ pipeline {
                     
                     echo "Cloning Upmonth analytics repo..."
                     dir('upmonth-analytics') {
-                        git credentialsId: 'bitbucket-ssh-key', url: "${ANALYTICS_REPO}"
+                        git credentialsId: 'bitbucket-ssh-key-new', url: "${ANALYTICS_REPO}"
                     }
 
                     echo "Cloning CI Integration repo..."
