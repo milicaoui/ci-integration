@@ -1,6 +1,37 @@
 version: '3.8'
 
+networks:
+  upmonth-dev-tests:
+    driver: bridge
+
 services:
+
+  mongodb:
+    image: mongo
+    container_name: mongodb
+    volumes: 
+      - mongodb_data:/data/db
+    ports: 
+      - 27017:27017
+    restart: always
+    networks:
+      - upmonth-dev-tests
+
+  upmanalytics:
+    build:
+      context: ../upmonth-analytics
+      dockerfile: ./dockerFiles/Dockerfile-dev
+      args:
+        ARG_VERSION: ${UPM_ANALYTICS_VERSION}
+    container_name: upmanalytics
+    ports:
+      - 9966:9966
+    depends_on:
+      - mongodb
+    restart: always
+    networks:
+      - upmonth-dev-tests
+
   upmonth-database:
     image: mysql:5.7
     container_name: testupmonthdb
@@ -70,10 +101,6 @@ services:
     container_name: pytest-tests
     networks:
       - upmonth-dev-tests
-
-networks:
-  upmonth-dev-tests:
-    driver: bridge
 
 volumes:
   upmonth-database-data:
