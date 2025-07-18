@@ -56,18 +56,16 @@ pipeline {
             }
         }
 
-
-
         stage('Build Analytics Service') {
             steps {
+                configFileProvider([configFile(fileId: 'upmonth-maven-settings', variable: 'MAVEN_SETTINGS')]) {
                 dir('upmonth-analytics') {
-                    sh '''
-                    mvn clean package -DskipTests
-                    cp target/upmonth-analytics.jar target/upmonth-analytics-${ANALYTICS_VERSION}.jar
-                    '''
+                    sh "mvn clean package -s $MAVEN_SETTINGS -DskipTests"
+                }
                 }
             }
         }
+
 
         stage('Verify Structure') {
             steps {
