@@ -60,10 +60,17 @@ pipeline {
             steps {
                 configFileProvider([configFile(fileId: 'upmonth-maven-settings', variable: 'MAVEN_SETTINGS')]) {
                     dir('upmonth-analytics') {
-                        sh 'cat $MAVEN_SETTINGS' // Optional debug
+                        // Optional debug (remove in production)
+                        sh 'cat $MAVEN_SETTINGS > maven_settings_debug.txt'
+                        sh 'java -version'  // Verify Java version being used
+                        
+                        // Build command with compiler settings
                         sh """
-                            mvn clean package -s $MAVEN_SETTINGS -DskipTests \
-                            -Dmaven.compiler.source=8 -Dmaven.compiler.target=8
+                            mvn clean package -s $MAVEN_SETTINGS \
+                            -DskipTests \
+                            -Dmaven.compiler.source=8 \
+                            -Dmaven.compiler.target=8 \
+                            -Dmaven.compiler.release=8
                         """
                     }
                 }
