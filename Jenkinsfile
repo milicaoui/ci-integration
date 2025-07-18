@@ -17,20 +17,6 @@ pipeline {
             }
         }
 
-        stage('Cleanup') {
-            steps {
-                dir('ci-integration') {
-                    sh '''
-                        echo "Cleaning up old docker containers and networks..."
-                        docker compose down --remove-orphans || true
-                        docker rm -f springbootapp || true
-                        docker rm -f pytest-tests || true
-                        docker rm -f testupmonthdb || true
-                    '''
-                }
-            }
-        }
-
         stage('Clone Projects') {
             steps {
                 script {
@@ -53,6 +39,22 @@ pipeline {
                 }
             }
         }
+
+        stage('Cleanup') {
+            steps {
+                dir('ci-integration') {
+                    sh '''
+                        echo "Cleaning up old docker containers and networks..."
+                        docker compose down --remove-orphans || true
+                        docker rm -f springbootapp || true
+                        docker rm -f pytest-tests || true
+                        docker rm -f testupmonthdb || true
+                    '''
+                }
+            }
+        }
+
+
 
         stage('Build Analytics Service') {
             steps {
