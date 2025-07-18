@@ -61,11 +61,15 @@ pipeline {
                 configFileProvider([configFile(fileId: 'upmonth-maven-settings', variable: 'MAVEN_SETTINGS')]) {
                     dir('upmonth-analytics') {
                         sh 'cat $MAVEN_SETTINGS' // Optional debug
-                        sh "mvn clean package -s $MAVEN_SETTINGS -DskipTests"
+                        sh """
+                            mvn clean package -s $MAVEN_SETTINGS -DskipTests \
+                            -Dmaven.compiler.source=8 -Dmaven.compiler.target=8
+                        """
                     }
                 }
             }
         }
+
 
 
 
