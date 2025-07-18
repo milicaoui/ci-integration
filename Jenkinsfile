@@ -68,7 +68,8 @@ pipeline {
                             -Dmaven.compiler.release=8 \
                             -Dmaven.compiler.plugin.version=3.8.1 \
                             -Dmaven.compiler.showWarnings=true \
-                            -Dmaven.compiler.showDeprecation=true
+                            -Dmaven.compiler.showDeprecation=true \
+                            -Dplugin:org.apache.maven.plugins:maven-compiler-plugin=3.8.1
                         """
                     }
                 }
