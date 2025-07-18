@@ -17,6 +17,15 @@ pipeline {
             }
         }
 
+        stage('Add Bitbucket to known_hosts') {
+            steps {
+                sh '''
+                    mkdir -p ~/.ssh
+                    ssh-keyscan bitbucket.org >> ~/.ssh/known_hosts
+                '''
+            }
+        }
+
         stage('Clone Projects') {
             steps {
                 script {
