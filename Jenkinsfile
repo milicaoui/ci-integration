@@ -60,26 +60,18 @@ pipeline {
             steps {
                 configFileProvider([configFile(fileId: 'upmonth-maven-settings', variable: 'MAVEN_SETTINGS')]) {
                     dir('upmonth-analytics') {
-                        sh """
-                            # First, forcefully update the compiler plugin version in the POM
-                            sed -i 's/<maven.compiler.plugin.version>.*</<maven.compiler.plugin.version>3.8.1</' pom.xml || true
-                            sed -i 's/<version>3.1</<version>3.8.1</' upmonth-analytics-api/pom.xml || true
-                            
-                            # Then build with all our overrides
-                            mvn clean package -s $MAVEN_SETTINGS \
-                            -DskipTests \
-                            -Dmaven.compiler.source=8 \
-                            -Dmaven.compiler.target=8 \
-                            -Dmaven.compiler.release=8 \
-                            -Dmaven.compiler.plugin.version=3.8.1 \
-                            -Dplugin:org.apache.maven.plugins:maven-compiler-plugin=3.8.1 \
-                            -Dplugin:org.apache.maven.plugins:maven-compiler-plugin:compile=3.8.1:compile
-                        """
+                        sh '''
+                            source "$HOME/.sdkman/bin/sdkman-init.sh"
+                            sdk use java 8.0.392-tem
+                            echo "Using Java version:"
+                            java -version
+
+                            mvn clean package -s $MAVEN_SETTINGS -DskipTests
+                        '''
                     }
                 }
             }
         }
-
 
         stage('Verify Structure') {
             steps {
