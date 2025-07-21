@@ -20,7 +20,7 @@ services:
       context: ../upmonth-analytics
       dockerfile: ./dockerFiles/Dockerfile-dev
       args:
-        ARG_VERSION: ${UPM_ANALYTICS_VERSION}
+        ARG_VERSION: 0.1.169
     container_name: upmanalytics
     ports:
       - 9966:9966
