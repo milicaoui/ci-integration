@@ -6,7 +6,6 @@ pipeline {
         SPRING_REPO = 'https://github.com/milicaoui/springbootapp.git'
         TEST_REPO = 'https://github.com/milicaoui/pytestproject.git'
         ANALYTICS_REPO = 'git@bitbucket.org:upmonthteam/upmonth-analytics.git'
-        UPM_ANALYTICS_VERSION = "666.0.0"  // or read dynamically from pom.xml if needed
         MYSQL_ROOT_PASSWORD = 'upmonth'  // Add other env vars if needed
     }
 
@@ -55,15 +54,17 @@ pipeline {
 
         stage('Extract Analytics Version') {
             steps {
-                dir('upmonth-analytics/upmonth-analytics') {
-                    script {
-                        def version = sh(script: "mvn help:evaluate -Dexpression=project.version -q -DforceStdout", returnStdout: true).trim()
-                        env.UPM_ANALYTICS_VERSION = version
-                        echo "📦 Detected Analytics version: ${env.UPM_ANALYTICS_VERSION}"
-                    }
+                script {
+                    def version = sh(
+                        script: "cd upmonth-analytics/upmonth-analytics && mvn help:evaluate -Dexpression=project.version -q -DforceStdout",
+                        returnStdout: true
+                    ).trim()
+                    echo "📦 Detected Analytics version: ${version}"
+                    env.UPM_ANALYTICS_VERSION = version  // ✅ Now truly global
                 }
             }
         }
+
 
         stage('Build Analytics Service') {
             environment {
@@ -106,7 +107,8 @@ pipeline {
 
                     echo "--- Upmonth Analytics Jar ---"
                     ls -la upmonth-analytics/upmonth-analytics/target/
-                    [ -f "upmonth-analytics/upmonth-analytics/target/upmonth-analytics-${UPM_ANALYTICS_VERSION}.jar" ] || (echo "Missing analytics jar" && exit 1)
+                    EXPECTED_JAR="upmonth-analytics-${UPM_ANALYTICS_VERSION}.jar"
+                    [ -f "upmonth-analytics/upmonth-analytics/target/$EXPECTED_JAR" ] || (echo "❌ Missing analytics jar: $EXPECTED_JAR" && exit 1)
                 '''
             }
         }
