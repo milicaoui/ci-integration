@@ -18,7 +18,13 @@ pipeline {
             }
         }
 
-
+        stage('Who am I?') {
+            steps {
+                ECHO "wHO AM i"
+                sh 'whoami'
+                sh 'ls -la $HOME/.sdkman'
+            }
+        }
 
         stage('Clone Projects') {
             steps {
