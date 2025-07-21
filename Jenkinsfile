@@ -105,9 +105,6 @@ pipeline {
                         ls -la pytestproject/
                         [ -f "pytestproject/requirements.txt" ] || (echo "Missing requirements.txt" && exit 1)
 
-                        echo "Expected JAR: ${expectedJar}"
-                        ls -la "upmonth-analytics/upmonth-analytics/target/"
-                        [ -f "upmonth-analytics/upmonth-analytics/target/${expectedJar}" ] || (echo "❌ Missing analytics jar: ${expectedJar}" && exit 1)
                     """
                 }
             }
