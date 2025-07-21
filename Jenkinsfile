@@ -54,16 +54,16 @@ pipeline {
 
         stage('Extract Analytics Version') {
             steps {
-                script {
-                    def version = sh(
-                        script: "cd upmonth-analytics/upmonth-analytics && mvn help:evaluate -Dexpression=project.version -q -DforceStdout",
-                        returnStdout: true
-                    ).trim()
-                    echo "📦 Detected Analytics version: ${version}"
-                    env.UPM_ANALYTICS_VERSION = version  // ✅ Now truly global
+                dir('upmonth-analytics/upmonth-analytics') {
+                    script {
+                        def version = sh(script: "mvn help:evaluate -Dexpression=project.version -q -DforceStdout", returnStdout: true).trim()
+                        echo "📦 Detected Analytics version: ${version}"
+                        env.UPM_ANALYTICS_VERSION = version
+                    }
                 }
             }
         }
+
 
 
         stage('Build Analytics Service') {
@@ -105,10 +105,10 @@ pipeline {
                     ls -la pytestproject/
                     [ -f "pytestproject/requirements.txt" ] || (echo "Missing requirements.txt" && exit 1)
 
-                    echo "--- Upmonth Analytics Jar ---"
-                    ls -la upmonth-analytics/upmonth-analytics/target/
-                    EXPECTED_JAR="upmonth-analytics-${UPM_ANALYTICS_VERSION}.jar"
-                    [ -f "upmonth-analytics/upmonth-analytics/target/$EXPECTED_JAR" ] || (echo "❌ Missing analytics jar: $EXPECTED_JAR" && exit 1)
+                    EXPECTED_JAR="upmonth-analytics-${UPM_ANALYTICS_VERSION}"
+                    echo "Expected JAR: $EXPECTED_JAR"
+                    ls -la "upmonth-analytics/upmonth-analytics/target/"
+                    [ -f "upmonth-analytics/upmonth-analytics/target/${EXPECTED_JAR}.jar" ] || (echo "❌ Missing analytics jar: ${EXPECTED_JAR}.jar" && exit 1)
                 '''
             }
         }
