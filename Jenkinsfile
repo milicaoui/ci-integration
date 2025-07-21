@@ -9,8 +9,6 @@ pipeline {
         UPM_ANALYTICS_VERSION = "666.0.0"  // or read dynamically from pom.xml if needed
         MYSQL_ROOT_PASSWORD = 'upmonth'  // Add any other env vars here if needed
 
-        SDKMAN_DIR = "/var/jenkins_home/.sdkman"
-        PATH = "/var/jenkins_home/.sdkman/candidates/java/current/bin:$PATH"
     }
 
     stages {
@@ -60,16 +58,20 @@ pipeline {
         }
 
         stage('Build Analytics Service') {
+            environment {
+                SDKMAN_DIR = "/var/jenkins_home/.sdkman"
+                PATH = "${SDKMAN_DIR}/candidates/java/current/bin:$PATH"
+            }
             steps {
                 configFileProvider([configFile(fileId: 'upmonth-maven-settings', variable: 'MAVEN_SETTINGS')]) {
                     dir('upmonth-analytics') {
                         sh '''#!/bin/bash
                             echo "✅ SDKMAN test:"
                             echo "SDKMAN_DIR is: $SDKMAN_DIR"
-                            ls -la "$SDKMAN_DIR/bin" || echo "SDKMAN bin directory missing"
+                            ls -la "$SDKMAN_DIR/etc" || echo "SDKMAN etc directory missing"
 
                             echo "🔁 Initializing SDKMAN..."
-                            source "$SDKMAN_DIR/bin/sdkman-init.sh" || { echo "❌ Failed to source SDKMAN"; exit 1; }
+                            source "$SDKMAN_DIR/etc/init.d/sdkman-init.sh" || { echo "❌ Failed to source SDKMAN"; exit 1; }
 
                             echo "⚙️ Switching Java version..."
                             sdk use java 8.0.392-tem || { echo "❌ Failed to switch Java version"; exit 1; }
@@ -84,6 +86,7 @@ pipeline {
                 }
             }
         }
+
 
         stage('Verify Structure') {
             steps {
