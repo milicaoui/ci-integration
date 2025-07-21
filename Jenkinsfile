@@ -40,7 +40,6 @@ pipeline {
                         docker compose down --remove-orphans || true
                         docker rm -f pytest-tests || true
                         docker rm -f testupmonthdb || true
-                        // Removed springbootapp container cleanup
                     '''
                 }
             }
