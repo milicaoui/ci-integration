@@ -54,6 +54,32 @@ services:
       retries: 30
     command: --default-authentication-plugin=mysql_native_password
 
+  query-web:
+    container_name: query-web
+    build:
+      context: ../upmonth-query-dsl
+      dockerfile: ./Dockerfile
+    ports:
+      - "5000:80"
+    volumes:
+      - ../query-service:/app
+    env_file:
+      - .env
+    depends_on:
+      - upmonth-database
+      - memcached-dsl
+    networks:
+      - upmonth-dev-tests
+  
+  memcached-dsl:
+    container_name: memcached-dsl
+    image: launcher.gcr.io/google/memcached1
+    ports:
+      - "11212:11211"
+    networks:
+      - upmonth-dev-tests
+    
+
   db-init:
     image: mysql:5.7
     depends_on:
@@ -63,11 +89,16 @@ services:
       - upmonth-dev-tests
     environment:
       MYSQL_ROOT_PASSWORD: upmonth
+    volumes:
+      - ./init-db:/docker-entrypoint-initdb.d
     entrypoint:
       - sh
       - -c
       - |
-        mysql -h upmonthdb -uroot -p"$MYSQL_ROOT_PASSWORD" -e "CREATE DATABASE IF NOT EXISTS upmonthdb CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+        for file in /docker-entrypoint-initdb.d/*.sql; do
+          echo "Running $file"
+          mysql -h upmonthdb -uroot -p"$MYSQL_ROOT_PASSWORD" < "$file"
+        done
 
   pytest-tests:
     build:

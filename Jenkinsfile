@@ -5,6 +5,7 @@ pipeline {
         CI_REPO = 'https://github.com/milicaoui/ci-integration.git'
         TEST_REPO = 'https://github.com/milicaoui/pytestproject.git'
         ANALYTICS_REPO = 'git@bitbucket.org:upmonthteam/upmonth-analytics.git'
+        DSL_REPO = 'git@bitbucket.org:upmonthteam/upmonth-query-dsl.git'
         MYSQL_ROOT_PASSWORD = 'upmonth'
     }
 
@@ -28,6 +29,11 @@ pipeline {
 
                     echo "Cloning Pytest repo..."
                     sh "git clone $TEST_REPO pytestproject"
+
+                    echo "Cloning Upmonth dsl repo..."
+                    dir('upmonth-query-dsl') {
+                        git credentialsId: 'bitbucket-ssh-key-new', url: "${DSL_REPO}"
+                    }
                 }
             }
         }
