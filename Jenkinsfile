@@ -6,7 +6,8 @@ pipeline {
         SPRING_REPO = 'https://github.com/milicaoui/springbootapp.git'
         TEST_REPO = 'https://github.com/milicaoui/pytestproject.git'
         ANALYTICS_REPO = 'git@bitbucket.org:upmonthteam/upmonth-analytics.git'
-        MYSQL_ROOT_PASSWORD = 'upmonth'  // Add other env vars if needed
+        MYSQL_ROOT_PASSWORD = 'upmonth'
+        UPM_ANALYTICS_VERSION = '0.1.169'  // Hardcoded version here
     }
 
     stages {
@@ -29,7 +30,7 @@ pipeline {
 
                     echo "Cloning Spring Boot repo (PRIVATE)..."
                     dir('springbootapp') {
-                        git credentialsId: 'fde95b67-c24d-4ad3-bd22-297701e72f6a', url: 'https://github.com/milicaoui/springbootapp.git'
+                        git credentialsId: 'fde95b67-c24d-4ad3-bd22-297701e72f6a', url: "${SPRING_REPO}"
                     }
 
                     echo "Cloning Pytest repo..."
@@ -51,20 +52,6 @@ pipeline {
                 }
             }
         }
-
-        stage('Extract Analytics Version') {
-            steps {
-                dir('upmonth-analytics/upmonth-analytics') {
-                    script {
-                        def version = sh(script: "mvn help:evaluate -Dexpression=project.version -q -DforceStdout", returnStdout: true).trim()
-                        echo "📦 Detected Analytics version: ${version}"
-                        env.UPM_ANALYTICS_VERSION = version
-                    }
-                }
-            }
-        }
-
-
 
         stage('Build Analytics Service') {
             environment {
@@ -104,7 +91,6 @@ pipeline {
                         echo "--- Pytest Project ---"
                         ls -la pytestproject/
                         [ -f "pytestproject/requirements.txt" ] || (echo "Missing requirements.txt" && exit 1)
-
                     """
                 }
             }
@@ -113,12 +99,12 @@ pipeline {
         stage('Run Integration Tests') {
             steps {
                 dir('ci-integration') {
-                    sh '''
+                    sh """
                         echo "Running integration tests with docker-compose..."
-                        echo "UPM_ANALYTICS_VERSION=${UPM_ANALYTICS_VERSION}" > .env
+                        echo "UPM_ANALYTICS_VERSION=${env.UPM_ANALYTICS_VERSION}" > .env
                         docker compose build --no-cache
                         docker compose up --abort-on-container-exit --exit-code-from pytest-tests spring-app pytest-tests
-                    '''
+                    """
                 }
             }
         }
