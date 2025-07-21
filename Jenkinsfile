@@ -66,10 +66,10 @@ pipeline {
                         sh '''#!/bin/bash
                             echo "✅ SDKMAN test:"
                             echo "SDKMAN_DIR is: $SDKMAN_DIR"
-                            ls -la "$SDKMAN_DIR/etc" || echo "SDKMAN etc directory missing"
+                            ls -la "$SDKMAN_DIR/bin" || echo "SDKMAN bin directory missing"
 
                             echo "🔁 Initializing SDKMAN..."
-                            source "$SDKMAN_DIR/etc/init.d/sdkman-init.sh" || { echo "❌ Failed to source SDKMAN"; exit 1; }
+                            source "$SDKMAN_DIR/bin/sdkman-init.sh" || { echo "❌ Failed to source SDKMAN"; exit 1; }
 
                             echo "⚙️ Switching Java version..."
                             sdk use java 8.0.392-tem || { echo "❌ Failed to switch Java version"; exit 1; }
