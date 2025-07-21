@@ -18,14 +18,6 @@ pipeline {
             }
         }
 
-        stage('Who am I?') {
-            steps {
-                eco "wHO AM i"
-                sh 'whoami'
-                sh 'ls -la $HOME/.sdkman'
-            }
-        }
-
         stage('Clone Projects') {
             steps {
                 script {
