@@ -53,6 +53,18 @@ pipeline {
             }
         }
 
+        stage('Extract Analytics Version') {
+            steps {
+                dir('upmonth-analytics/upmonth-analytics') {
+                    script {
+                        def version = sh(script: "mvn help:evaluate -Dexpression=project.version -q -DforceStdout", returnStdout: true).trim()
+                        env.UPM_ANALYTICS_VERSION = version
+                        echo "📦 Detected Analytics version: ${env.UPM_ANALYTICS_VERSION}"
+                    }
+                }
+            }
+        }
+
         stage('Build Analytics Service') {
             environment {
                 SDKMAN_DIR = "/var/jenkins_home/.sdkman"
