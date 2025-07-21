@@ -32,7 +32,7 @@ pipeline {
 
                     echo "Cloning Upmonth dsl repo..."
                     dir('upmonth-query-dsl') {
-                        git credentialsId: 'bitbucket-ssh-key-new', url: "${DSL_REPO}"
+                        git branch: 'main', credentialsId: 'bitbucket-ssh-key-new', url: "${DSL_REPO}"
                     }
                 }
             }
@@ -51,18 +51,7 @@ pipeline {
             }
         }
 
-        stage('Extract Analytics Version') {
-            steps {
-                dir('upmonth-analytics/upmonth-analytics') {
-                    script {
-                        def version = sh(script: "mvn help:evaluate -Dexpression=project.version -q -DforceStdout", returnStdout: true).trim()
-                        echo "📦 Detected Analytics version: ${version}"
-                        env.UPM_ANALYTICS_VERSION = version
-                    }
-                }
-            }
-        }
-
+        /*
         stage('Build Analytics Service') {
             environment {
                 SDKMAN_DIR = "/var/jenkins_home/.sdkman"
@@ -100,6 +89,7 @@ pipeline {
                 }
             }
         }
+        */
 
         stage('Run Integration Tests') {
             steps {
