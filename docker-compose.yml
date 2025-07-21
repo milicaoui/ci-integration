@@ -69,33 +69,9 @@ services:
       - |
         mysql -h upmonthdb -uroot -p"$MYSQL_ROOT_PASSWORD" -e "CREATE DATABASE IF NOT EXISTS upmonthdb CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 
-
-  spring-app:
-    build:
-      context: ../springbootapp
-    ports:
-      - "8081:8081"
-    container_name: springbootapp
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://upmonthdb:3306/upmonthdb?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&connectTimeout=30000
-      SPRING_DATASOURCE_USERNAME: upmonth
-      SPRING_DATASOURCE_PASSWORD: upmonth
-    depends_on:
-      - db-init
-    networks:
-      - upmonth-dev-tests
-    healthcheck:
-      test: ["CMD-SHELL", "exit 0"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-
   pytest-tests:
     build:
       context: ../pytestproject
-    depends_on:
-      spring-app:
-        condition: service_healthy
     container_name: pytest-tests
     networks:
       - upmonth-dev-tests

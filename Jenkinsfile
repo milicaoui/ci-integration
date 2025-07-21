@@ -3,11 +3,9 @@ pipeline {
 
     environment {
         CI_REPO = 'https://github.com/milicaoui/ci-integration.git'
-        SPRING_REPO = 'https://github.com/milicaoui/springbootapp.git'
         TEST_REPO = 'https://github.com/milicaoui/pytestproject.git'
         ANALYTICS_REPO = 'git@bitbucket.org:upmonthteam/upmonth-analytics.git'
         MYSQL_ROOT_PASSWORD = 'upmonth'
-        UPM_ANALYTICS_VERSION = '0.1.169'  // Hardcoded version here
     }
 
     stages {
@@ -28,10 +26,7 @@ pipeline {
                     echo "Cloning CI Integration repo..."
                     sh "git clone $CI_REPO ci-integration"
 
-                    echo "Cloning Spring Boot repo (PRIVATE)..."
-                    dir('springbootapp') {
-                        git credentialsId: 'fde95b67-c24d-4ad3-bd22-297701e72f6a', url: "${SPRING_REPO}"
-                    }
+                    // Removed springbootapp cloning
 
                     echo "Cloning Pytest repo..."
                     sh "git clone $TEST_REPO pytestproject"
@@ -45,10 +40,22 @@ pipeline {
                     sh '''
                         echo "Cleaning up old docker containers and networks..."
                         docker compose down --remove-orphans || true
-                        docker rm -f springbootapp || true
                         docker rm -f pytest-tests || true
                         docker rm -f testupmonthdb || true
+                        // Removed springbootapp container cleanup
                     '''
+                }
+            }
+        }
+
+        stage('Extract Analytics Version') {
+            steps {
+                dir('upmonth-analytics/upmonth-analytics') {
+                    script {
+                        def version = sh(script: "mvn help:evaluate -Dexpression=project.version -q -DforceStdout", returnStdout: true).trim()
+                        echo "📦 Detected Analytics version: ${version}"
+                        env.UPM_ANALYTICS_VERSION = version
+                    }
                 }
             }
         }
@@ -78,15 +85,10 @@ pipeline {
         stage('Verify Structure') {
             steps {
                 script {
-                    def expectedJar = "upmonth-analytics-${env.UPM_ANALYTICS_VERSION}.jar"
                     sh """
                         echo "--- CI Integration ---"
                         ls -la ci-integration/
                         [ -f "ci-integration/docker-compose.yml" ] || (echo "Missing docker-compose.yml" && exit 1)
-
-                        echo "--- Spring Boot App ---"
-                        ls -la springbootapp/
-                        [ -f "springbootapp/pom.xml" ] || (echo "Missing pom.xml" && exit 1)
 
                         echo "--- Pytest Project ---"
                         ls -la pytestproject/
@@ -99,12 +101,12 @@ pipeline {
         stage('Run Integration Tests') {
             steps {
                 dir('ci-integration') {
-                    sh """
+                    sh '''
                         echo "Running integration tests with docker-compose..."
-                        echo "UPM_ANALYTICS_VERSION=${env.UPM_ANALYTICS_VERSION}" > .env
+                        echo "UPM_ANALYTICS_VERSION=${UPM_ANALYTICS_VERSION}" > .env
                         docker compose build --no-cache
-                        docker compose up --abort-on-container-exit --exit-code-from pytest-tests spring-app pytest-tests
-                    """
+                        docker compose up --abort-on-container-exit --exit-code-from pytest-tests pytest-tests
+                    '''
                 }
             }
         }
@@ -116,7 +118,6 @@ pipeline {
                 sh '''
                     echo "Cleaning up docker containers after tests..."
                     docker compose down --remove-orphans || true
-                    docker rm -f springbootapp || true
                     docker rm -f pytest-tests || true
                     docker rm -f testupmonthdb || true
                 '''
