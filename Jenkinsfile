@@ -20,7 +20,7 @@ pipeline {
 
         stage('Who am I?') {
             steps {
-                ECHO "wHO AM i"
+                eco "wHO AM i"
                 sh 'whoami'
                 sh 'ls -la $HOME/.sdkman'
             }
