@@ -55,7 +55,6 @@ pipeline {
                 }
             }
         }
-
         stage('Build Analytics Service') {
             steps {
                 configFileProvider([configFile(fileId: 'upmonth-maven-settings', variable: 'MAVEN_SETTINGS')]) {
@@ -68,6 +67,7 @@ pipeline {
                             echo "Using Java version:"
                             java -version
 
+                            echo "Building with version ${UPM_ANALYTICS_VERSION}"
                             mvn clean package -s "$MAVEN_SETTINGS" -DskipTests
                         '''
                     }
