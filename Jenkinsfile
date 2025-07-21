@@ -6,7 +6,7 @@ pipeline {
         SPRING_REPO = 'https://github.com/milicaoui/springbootapp.git'
         TEST_REPO = 'https://github.com/milicaoui/pytestproject.git'
         ANALYTICS_REPO = 'git@bitbucket.org:upmonthteam/upmonth-analytics.git'
-        ANALYTICS_VERSION = "666.0.0"  // or read dynamically from pom.xml if needed
+        UPM_ANALYTICS_VERSION = "666.0.0"  // or read dynamically from pom.xml if needed
         MYSQL_ROOT_PASSWORD = 'upmonth'  // Add any other env vars here if needed
     }
 
@@ -104,7 +104,7 @@ pipeline {
                 dir('ci-integration') {
                     sh '''
                         echo "Running integration tests with docker-compose..."
-                        echo "UPM_ANALYTICS_VERSION=${ANALYTICS_VERSION}" > .env
+                        echo "UPM_ANALYTICS_VERSION=${UPM_ANALYTICS_VERSION}" > .env
                         docker compose build --no-cache
                         docker compose up --abort-on-container-exit --exit-code-from pytest-tests spring-app pytest-tests
                     '''
