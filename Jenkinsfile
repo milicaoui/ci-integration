@@ -61,16 +61,20 @@ pipeline {
                 configFileProvider([configFile(fileId: 'upmonth-maven-settings', variable: 'MAVEN_SETTINGS')]) {
                     dir('upmonth-analytics') {
                         sh '''
+                            #!/bin/bash
                             export SDKMAN_DIR="/var/jenkins_home/.sdkman"
-                            source /var/jenkins_home/.sdkman/bin/sdkman-init.sh
+                            source "$SDKMAN_DIR/bin/sdkman-init.sh"
                             sdk use java 8.0.392-tem
-                            echo "Using Java version"
+                            echo "Using Java version:"
                             java -version
+
+                            mvn clean package -s "$MAVEN_SETTINGS" -DskipTests
                         '''
                     }
                 }
             }
         }
+
 
         stage('Verify Structure') {
             steps {
