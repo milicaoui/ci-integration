@@ -58,7 +58,7 @@ pipeline {
         stage('Build Analytics Service') {
             environment {
                 SDKMAN_DIR = "/var/jenkins_home/.sdkman"
-                PATH = "${SDKMAN_DIR}/candidates/java/current/bin:$PATH"
+                PATH = "${SDKMAN_DIR}/candidates/java/current/bin:${env.PATH}"
             }
             steps {
                 configFileProvider([configFile(fileId: 'upmonth-maven-settings', variable: 'MAVEN_SETTINGS')]) {
