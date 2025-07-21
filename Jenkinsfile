@@ -88,28 +88,28 @@ pipeline {
             }
         }
 
-
-
         stage('Verify Structure') {
             steps {
-                sh '''
-                    echo "--- CI Integration ---"
-                    ls -la ci-integration/
-                    [ -f "ci-integration/docker-compose.yml" ] || (echo "Missing docker-compose.yml" && exit 1)
+                script {
+                    def expectedJar = "upmonth-analytics-${env.UPM_ANALYTICS_VERSION}.jar"
+                    sh """
+                        echo "--- CI Integration ---"
+                        ls -la ci-integration/
+                        [ -f "ci-integration/docker-compose.yml" ] || (echo "Missing docker-compose.yml" && exit 1)
 
-                    echo "--- Spring Boot App ---"
-                    ls -la springbootapp/
-                    [ -f "springbootapp/pom.xml" ] || (echo "Missing pom.xml" && exit 1)
+                        echo "--- Spring Boot App ---"
+                        ls -la springbootapp/
+                        [ -f "springbootapp/pom.xml" ] || (echo "Missing pom.xml" && exit 1)
 
-                    echo "--- Pytest Project ---"
-                    ls -la pytestproject/
-                    [ -f "pytestproject/requirements.txt" ] || (echo "Missing requirements.txt" && exit 1)
+                        echo "--- Pytest Project ---"
+                        ls -la pytestproject/
+                        [ -f "pytestproject/requirements.txt" ] || (echo "Missing requirements.txt" && exit 1)
 
-                    EXPECTED_JAR="upmonth-analytics-${UPM_ANALYTICS_VERSION}"
-                    echo "Expected JAR: $EXPECTED_JAR"
-                    ls -la "upmonth-analytics/upmonth-analytics/target/"
-                    [ -f "upmonth-analytics/upmonth-analytics/target/${EXPECTED_JAR}.jar" ] || (echo "❌ Missing analytics jar: ${EXPECTED_JAR}.jar" && exit 1)
-                '''
+                        echo "Expected JAR: ${expectedJar}"
+                        ls -la "upmonth-analytics/upmonth-analytics/target/"
+                        [ -f "upmonth-analytics/upmonth-analytics/target/${expectedJar}" ] || (echo "❌ Missing analytics jar: ${expectedJar}" && exit 1)
+                    """
+                }
             }
         }
 
