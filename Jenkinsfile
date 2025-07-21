@@ -8,6 +8,9 @@ pipeline {
         ANALYTICS_REPO = 'git@bitbucket.org:upmonthteam/upmonth-analytics.git'
         UPM_ANALYTICS_VERSION = "666.0.0"  // or read dynamically from pom.xml if needed
         MYSQL_ROOT_PASSWORD = 'upmonth'  // Add any other env vars here if needed
+
+        SDKMAN_DIR = "/var/jenkins_home/.sdkman"
+        PATH = "/var/jenkins_home/.sdkman/candidates/java/current/bin:$PATH"
     }
 
     stages {
@@ -61,13 +64,21 @@ pipeline {
                 configFileProvider([configFile(fileId: 'upmonth-maven-settings', variable: 'MAVEN_SETTINGS')]) {
                     dir('upmonth-analytics') {
                         sh '''#!/bin/bash
-                            export SDKMAN_DIR="/var/jenkins_home/.sdkman"
-                            source "$SDKMAN_DIR/bin/sdkman-init.sh"
-                            sdk use java 8.0.392-tem
-                            echo "Using Java version:"
+                            echo "✅ SDKMAN test:"
+                            echo "SDKMAN_DIR is: $SDKMAN_DIR"
+                            ls -la "$SDKMAN_DIR/bin" || echo "SDKMAN bin directory missing"
+
+                            echo "🔁 Initializing SDKMAN..."
+                            source "$SDKMAN_DIR/bin/sdkman-init.sh" || { echo "❌ Failed to source SDKMAN"; exit 1; }
+
+                            echo "⚙️ Switching Java version..."
+                            sdk use java 8.0.392-tem || { echo "❌ Failed to switch Java version"; exit 1; }
+
+                            echo "📢 Using Java version:"
                             java -version
 
-                            mvn clean package -s $MAVEN_SETTINGS -DskipTests
+                            echo "🚀 Building with Maven..."
+                            mvn clean package -s "$MAVEN_SETTINGS" -DskipTests
                         '''
                     }
                 }
