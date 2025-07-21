@@ -26,8 +26,6 @@ pipeline {
                     echo "Cloning CI Integration repo..."
                     sh "git clone $CI_REPO ci-integration"
 
-                    // Removed springbootapp cloning
-
                     echo "Cloning Pytest repo..."
                     sh "git clone $TEST_REPO pytestproject"
                 }
