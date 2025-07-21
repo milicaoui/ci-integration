@@ -7,8 +7,7 @@ pipeline {
         TEST_REPO = 'https://github.com/milicaoui/pytestproject.git'
         ANALYTICS_REPO = 'git@bitbucket.org:upmonthteam/upmonth-analytics.git'
         UPM_ANALYTICS_VERSION = "666.0.0"  // or read dynamically from pom.xml if needed
-        MYSQL_ROOT_PASSWORD = 'upmonth'  // Add any other env vars here if needed
-
+        MYSQL_ROOT_PASSWORD = 'upmonth'  // Add other env vars if needed
     }
 
     stages {
@@ -21,7 +20,6 @@ pipeline {
         stage('Clone Projects') {
             steps {
                 script {
-                    
                     echo "Cloning Upmonth analytics repo..."
                     dir('upmonth-analytics') {
                         git credentialsId: 'bitbucket-ssh-key-new', url: "${ANALYTICS_REPO}"
@@ -85,7 +83,6 @@ pipeline {
             }
         }
 
-
         stage('Verify Structure') {
             steps {
                 sh '''
@@ -100,15 +97,11 @@ pipeline {
                     echo "--- Pytest Project ---"
                     ls -la pytestproject/
                     [ -f "pytestproject/requirements.txt" ] || (echo "Missing requirements.txt" && exit 1)
-                '''
-            }
-        }
 
-        stage('Build Spring Boot App') {
-            steps {
-                dir('springbootapp') {
-                    sh 'mvn clean package -DskipTests'
-                }
+                    echo "--- Upmonth Analytics Jar ---"
+                    ls -la upmonth-analytics/target/
+                    [ -f "upmonth-analytics/target/upmonth-analytics-${UPM_ANALYTICS_VERSION}.jar" ] || (echo "Missing analytics jar" && exit 1)
+                '''
             }
         }
 
