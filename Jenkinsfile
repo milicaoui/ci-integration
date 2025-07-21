@@ -60,7 +60,7 @@ pipeline {
             steps {
                 configFileProvider([configFile(fileId: 'upmonth-maven-settings', variable: 'MAVEN_SETTINGS')]) {
                     dir('upmonth-analytics') {
-                        sh '''
+                        sh '''#!/bin/bash
                             source "$HOME/.sdkman/bin/sdkman-init.sh"
                             sdk use java 8.0.392-tem
                             echo "Using Java version:"
