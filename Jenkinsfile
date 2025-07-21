@@ -93,8 +93,8 @@ pipeline {
                     [ -f "pytestproject/requirements.txt" ] || (echo "Missing requirements.txt" && exit 1)
 
                     echo "--- Upmonth Analytics Jar ---"
-                    ls -la upmonth-analytics/target/
-                    [ -f "upmonth-analytics/target/upmonth-analytics-${UPM_ANALYTICS_VERSION}.jar" ] || (echo "Missing analytics jar" && exit 1)
+                    ls -la upmonth-analytics/upmonth-analytics/target/
+                    [ -f "upmonth-analytics/upmonth-analytics/target/upmonth-analytics-${UPM_ANALYTICS_VERSION}.jar" ] || (echo "Missing analytics jar" && exit 1)
                 '''
             }
         }
