@@ -17,7 +17,7 @@ services:
 
   upmanalytics:
     build:
-      context: ../upmonth-analytics
+      context: ../upmonth-analytics/upmonth-analytics
       dockerfile: ./dockerFiles/Dockerfile-dev
       args:
         ARG_VERSION: ${UPM_ANALYTICS_VERSION}

@@ -60,7 +60,7 @@ pipeline {
             }
             steps {
                 configFileProvider([configFile(fileId: 'upmonth-maven-settings', variable: 'MAVEN_SETTINGS')]) {
-                    dir('upmonth-analytics') {
+                    dir('upmonth-analytics/upmonth-analytics') {
                         sh '''#!/bin/bash
                             echo "Building analytics service with Maven..."
                             source "$SDKMAN_DIR/bin/sdkman-init.sh" || { echo "❌ Failed to source SDKMAN"; exit 1; }
