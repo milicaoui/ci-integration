@@ -55,26 +55,24 @@ pipeline {
                 }
             }
         }
+
         stage('Build Analytics Service') {
             steps {
                 configFileProvider([configFile(fileId: 'upmonth-maven-settings', variable: 'MAVEN_SETTINGS')]) {
                     dir('upmonth-analytics') {
-                        sh '''
-                            #!/bin/bash
+                        sh '''#!/bin/bash
                             export SDKMAN_DIR="/var/jenkins_home/.sdkman"
                             source "$SDKMAN_DIR/bin/sdkman-init.sh"
                             sdk use java 8.0.392-tem
                             echo "Using Java version:"
                             java -version
 
-                            echo "Building with version ${UPM_ANALYTICS_VERSION}"
-                            mvn clean package -s "$MAVEN_SETTINGS" -DskipTests
+                            mvn clean package -s $MAVEN_SETTINGS -DskipTests
                         '''
                     }
                 }
             }
         }
-
 
         stage('Verify Structure') {
             steps {
