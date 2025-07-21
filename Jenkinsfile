@@ -62,26 +62,20 @@ pipeline {
                 configFileProvider([configFile(fileId: 'upmonth-maven-settings', variable: 'MAVEN_SETTINGS')]) {
                     dir('upmonth-analytics') {
                         sh '''#!/bin/bash
-                            echo "✅ SDKMAN test:"
-                            echo "SDKMAN_DIR is: $SDKMAN_DIR"
-                            ls -la "$SDKMAN_DIR/bin" || echo "SDKMAN bin directory missing"
-
-                            echo "🔁 Initializing SDKMAN..."
+                            echo "Building analytics service with Maven..."
                             source "$SDKMAN_DIR/bin/sdkman-init.sh" || { echo "❌ Failed to source SDKMAN"; exit 1; }
-
-                            echo "⚙️ Switching Java version..."
                             sdk use java 8.0.392-tem || { echo "❌ Failed to switch Java version"; exit 1; }
-
-                            echo "📢 Using Java version:"
-                            java -version
-
-                            echo "🚀 Building with Maven..."
                             mvn clean package -s "$MAVEN_SETTINGS" -DskipTests
+
+                            echo "Listing target directory after build:"
+                            ls -la target || echo "target directory missing"
                         '''
                     }
                 }
             }
         }
+
+
 
         stage('Verify Structure') {
             steps {
