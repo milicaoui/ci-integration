@@ -1,5 +1,3 @@
-version: '3.8'
-
 networks:
   upmonth-dev-tests:
     driver: bridge
@@ -104,3 +102,4 @@ services:
 
 volumes:
   upmonth-database-data:
+  mongodb_data:
