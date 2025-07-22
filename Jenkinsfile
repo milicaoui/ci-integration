@@ -27,7 +27,8 @@ pipeline {
 
                     echo "Cloning CI Integration repo..."
                     dir('ci-integration') {
-                        git branch: 'main', url: "${CI_REPO}"
+                        sh 'rm -rf ci-integration || true'  // Cleanup if previous clone failed
+                        git branch: 'main', url: "${CI_REPO}", extensions: [[$class: 'CloneOption', depth: 1]]
                     }
 
                     echo "Cloning Pytest repo..."
