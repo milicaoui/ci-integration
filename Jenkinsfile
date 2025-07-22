@@ -25,9 +25,11 @@ pipeline {
                         git credentialsId: 'bitbucket-ssh-key-new', url: "${ANALYTICS_REPO}"
                     }
 
+                    /*
                     echo "Cloning CI Integration repo..."
                     sh "git clone $CI_REPO ci-integration"
-
+                    */
+                    
                     echo "Cloning Pytest repo..."
                     sh "git clone $TEST_REPO pytestproject"
 
@@ -36,13 +38,12 @@ pipeline {
                         git branch: 'main', credentialsId: 'bitbucket-ssh-key-new', url: "${DSL_REPO}"
                     }
 
-                    /*
+                    
                     echo "Cloning Text Extraction repo..."
                     dir('text-extraction') {
                         git credentialsId: 'bitbucket-ssh-key-new', url: "${TEXT_EXTRACTION_REPO}"
                     }
 
-                    */
                 }
             }
         }
