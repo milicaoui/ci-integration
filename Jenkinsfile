@@ -26,10 +26,14 @@ pipeline {
                     }
 
                     echo "Cloning CI Integration repo..."
-                    sh "git clone $CI_REPO ci-integration"
+                    dir('ci-integration') {
+                        git branch: 'main', url: "${CI_REPO}"
+                    }
 
                     echo "Cloning Pytest repo..."
-                    sh "git clone $TEST_REPO pytestproject"
+                    dir('pytestproject') {
+                        git branch: 'main', url: "${TEST_REPO}"
+                    }
 
                     echo "Cloning Upmonth dsl repo..."
                     dir('upmonth-query-dsl') {
@@ -43,6 +47,7 @@ pipeline {
                 }
             }
         }
+
 
         stage('Cleanup') {
             steps {
