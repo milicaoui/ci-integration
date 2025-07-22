@@ -54,6 +54,20 @@ services:
       retries: 30
     command: --default-authentication-plugin=mysql_native_password
 
+  text-extraction:
+    container_name: text-extraction
+    build:
+      context: ../text-extraction
+      dockerfile: ./Dockerfile
+    ports:
+      - "8090:80"
+    env_file:
+      - ../upmonth-text-extraction/.env
+    depends_on:
+      - upmonth-database
+    networks:
+      - upmonth-dev-tests
+
   query-web:
     container_name: query-web
     build:
@@ -64,7 +78,7 @@ services:
     volumes:
       - ../query-service:/app
     env_file:
-      - .env
+      - ../upmonth-query-dsl/.env
     depends_on:
       - upmonth-database
       - memcached-dsl

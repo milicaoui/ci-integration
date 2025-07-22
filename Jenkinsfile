@@ -6,6 +6,7 @@ pipeline {
         TEST_REPO = 'https://github.com/milicaoui/pytestproject.git'
         ANALYTICS_REPO = 'git@bitbucket.org:upmonthteam/upmonth-analytics.git'
         DSL_REPO = 'git@bitbucket.org:upmonthteam/upmonth-query-dsl.git'
+        TEXT_EXTRACTION_REPO = 'git@bitbucket.org:upmonthteam/upmonth-text-extraction.git'
         MYSQL_ROOT_PASSWORD = 'upmonth'
     }
 
@@ -33,6 +34,11 @@ pipeline {
                     echo "Cloning Upmonth dsl repo..."
                     dir('upmonth-query-dsl') {
                         git branch: 'main', credentialsId: 'bitbucket-ssh-key-new', url: "${DSL_REPO}"
+                    }
+
+                    echo "Cloning Text Extraction repo..."
+                    dir('text-extraction') {
+                        git credentialsId: 'bitbucket-ssh-key-new', url: "${TEXT_EXTRACTION_REPO}"
                     }
                 }
             }
@@ -74,6 +80,7 @@ pipeline {
             }
         }
 
+        */
         stage('Verify Structure') {
             steps {
                 script {
@@ -89,7 +96,7 @@ pipeline {
                 }
             }
         }
-        */
+        
 
         stage('Run Integration Tests') {
             steps {
@@ -99,6 +106,18 @@ pipeline {
                         echo "UPM_ANALYTICS_VERSION=${UPM_ANALYTICS_VERSION}" > .env
                         docker compose build --no-cache
                         docker compose up --abort-on-container-exit --exit-code-from pytest-tests pytest-tests
+                    '''
+
+                    sh '''
+                    echo "Waiting for text-extraction service to become healthy..."
+                    for i in {1..30}; do
+                    if curl -s http://localhost:8090/actuator/health | grep '"status":"UP"' > /dev/null; then
+                        echo "✅ Service is healthy!"
+                        break
+                    fi
+                    echo "⏳ Waiting..."
+                    sleep 2
+                    done
                     '''
                 }
             }
