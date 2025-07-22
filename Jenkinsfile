@@ -25,11 +25,11 @@ pipeline {
                         git credentialsId: 'bitbucket-ssh-key-new', url: "${ANALYTICS_REPO}"
                     }
 
-                    /*
+                    
                     echo "Cloning CI Integration repo..."
                     sh "git clone $CI_REPO ci-integration"
-                    */
                     
+
                     echo "Cloning Pytest repo..."
                     sh "git clone $TEST_REPO pytestproject"
 
