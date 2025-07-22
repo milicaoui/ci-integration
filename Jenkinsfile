@@ -26,29 +26,26 @@ pipeline {
                     }
 
                     echo "Cloning CI Integration repo..."
-                    dir('ci-integration') {
-                        sh 'rm -rf ci-integration || true'  // Cleanup if previous clone failed
-                        git branch: 'main', url: "${CI_REPO}", extensions: [[$class: 'CloneOption', depth: 1]]
-                    }
+                    sh "git clone $CI_REPO ci-integration"
 
                     echo "Cloning Pytest repo..."
-                    dir('pytestproject') {
-                        git branch: 'main', url: "${TEST_REPO}"
-                    }
+                    sh "git clone $TEST_REPO pytestproject"
 
                     echo "Cloning Upmonth dsl repo..."
                     dir('upmonth-query-dsl') {
                         git branch: 'main', credentialsId: 'bitbucket-ssh-key-new', url: "${DSL_REPO}"
                     }
 
+                    /*
                     echo "Cloning Text Extraction repo..."
                     dir('text-extraction') {
                         git credentialsId: 'bitbucket-ssh-key-new', url: "${TEXT_EXTRACTION_REPO}"
                     }
+
+                    */
                 }
             }
         }
-
 
         stage('Cleanup') {
             steps {
